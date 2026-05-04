@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistant Entretien — Level Hop</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#0d1117;color:#fff;padding:10px}
+#topbar{display:flex;align-items:center;gap:8px;background:#161b22;border-radius:10px;padding:8px 12px;margin-bottom:8px}
+#dot{width:10px;height:10px;border-radius:50%;background:#333;flex-shrink:0}
+#dot.on{background:#e24b4a;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+#stxt{font-size:12px;color:#888;flex:1}
+#bmicro{padding:6px 14px;font-size:13px;font-weight:bold;border:none;border-radius:6px;background:#21262d;color:#fff;cursor:pointer}
+#bmicro.on{background:#3d0000;color:#ff6b6b}
+#qbox{background:#161b22;border-radius:10px;padding:8px 12px;margin-bottom:8px;min-height:42px}
+#qlbl{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+#qtxt{font-size:13px;color:#888;font-style:italic;line-height:1.4}
+#abox{border:2px solid #1d4ed855;border-radius:12px;padding:14px 16px;min-height:95px;margin-bottom:8px}
+#albl{font-size:9px;color:#3b82f6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+#atxt{font-size:22px;font-weight:bold;color:#fff;line-height:1.5}
+#spin{display:none;font-size:16px;color:#3b82f6;padding:6px 0}
+#freebox{display:flex;gap:6px;margin-bottom:10px}
+#freeinp{flex:1;padding:8px 11px;font-size:13px;border-radius:7px;border:1px solid #21262d;background:#161b22;color:#fff;outline:none}
+#freebtn{padding:8px 14px;font-size:13px;font-weight:bold;border:none;border-radius:7px;background:#3b82f6;color:#fff;cursor:pointer}
+#btns{display:flex;flex-wrap:wrap;gap:5px}
+.qb{padding:6px 10px;font-size:11px;border-radius:7px;border:1px solid #21262d;background:#161b22;color:#bbb;cursor:pointer}
+.qb:hover{background:#21262d;color:#fff}
+.grp{width:100%;font-size:9px;color:#333;text-transform:uppercase;letter-spacing:.07em;margin:5px 0 2px}
+.sep{width:100%;border-top:1px solid #1a1f28;margin:4px 0}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div id="dot"></div>
+  <span id="stxt">Micro désactivé</span>
+  <button id="bmicro" onclick="toggleMic()">🎤 Activer micro</button>
+</div>
+<div id="qbox">
+  <div id="qlbl">Question détectée</div>
+  <div id="qtxt">Parlez ou cliquez sur un bouton...</div>
+</div>
+<div id="abox">
+  <div id="albl">Réponse</div>
+  <div id="atxt" style="color:#333;font-size:15px;font-weight:400">La réponse s'affiche ici en grand...</div>
+  <div id="spin">⚡</div>
+</div>
+<div id="freebox">
+  <input id="freeinp" placeholder="Question libre..." onkeydown="if(event.key==='Enter')sendFree()"/>
+  <button id="freebtn" onclick="sendFree()">→ Envoyer</button>
+</div>
+<div id="btns">
+  <div class="grp">Présentation & motivation</div>
+  <button class="qb" onclick="api('Présentez-vous')">🧑 Présentez-vous</button>
+  <button class="qb" onclick="api('Pourquoi ce poste chez Level Hop')">❓ Pourquoi ce poste</button>
+  <button class="qb" onclick="api('Pourquoi quitter votre organisme de formation')">🚪 Pourquoi quitter votre OF</button>
+  <button class="qb" onclick="api('Avez-vous déjà travaillé dans un CFA')">🏫 Expérience CFA</button>
+  <button class="qb" onclick="api('Différence entre un OF classique et un CFA')">⚖️ OF vs CFA</button>
+  <div class="grp">Conformité & contrôles</div>
+  <button class="qb" onclick="api('Votre connaissance de Qualiopi')">✅ Qualiopi</button>
+  <button class="qb" onclick="api('Comment vérifiez-vous un dossier apprenti avant contrôle OPCO')">🔍 Méthode contrôle</button>
+  <button class="qb" onclick="api('Que faites-vous si une pièce importante manque dans un dossier')">📄 Pièce manquante</button>
+  <button class="qb" onclick="api('Principaux risques de non-conformité dans un CFA comme Level Hop')">⚠️ Risques</button>
+  <button class="qb" onclick="api('Contrôle DREETS dans 2 semaines dossiers incohérents que faites-vous')">🚨 DREETS urgent</button>
+  <button class="qb" onclick="api('Comment vérifiez-vous que la facturation OPCO est conforme')">💶 Facturation OPCO</button>
+  <button class="qb" onclick="api('Comment organisez-vous l archivage documentaire')">🗂️ Archivage</button>
+  <div class="grp">Organisation & équipe</div>
+  <button class="qb" onclick="api('Comment faites-vous adhérer les équipes aux procédures sans tension')">👥 Adhésion équipes</button>
+  <button class="qb" onclick="api('Comment gérez-vous un volume important de dossiers en parallèle')">📋 Volume</button>
+  <button class="qb" onclick="api('Quels outils numériques pour la conformité')">💻 Outils</button>
+  <button class="qb" onclick="api('Comment garantissez-vous votre autonomie en télétravail')">🏠 Télétravail</button>
+  <button class="qb" onclick="api('Un responsable dit que vos procédures sont trop lourdes')">🤝 Désaccord</button>
+  <div class="grp">Fin d'entretien</div>
+  <button class="qb" onclick="api('Vos objectifs sur les 3 premiers mois')">📅 Plan 30/60/90j</button>
+  <button class="qb" onclick="api('Vos prétentions salariales')">💰 Salaire</button>
+  <button class="qb" onclick="api('Avez-vous des questions pour nous')">💬 Mes questions</button>
+  <div class="sep"></div>
+  <button class="qb" onclick="api('Phrase de secours 1 seule phrase percutante si je perds mes mots')" style="border-color:#3b82f6;color:#60a5fa">🆘 Secours</button>
+  <button class="qb" onclick="api('Pitch final 2 phrases pour conclure et marquer les esprits')" style="border-color:#22c55e;color:#4ade80">🎯 Pitch final</button>
+</div>
+
+<script>
+const PROXY='https://floral-math-455e.formadirect42.workers.dev/';
+const SYS=`Tu es le coach d'entretien de Nadir ASMANI pour un 2ème entretien chez Level Hop (poste : Chargé des Contrôles et de la Conformité CFA).
+
+LEVEL HOP : CFA 100% distance, Paris. CDI Performance = contrats apprentissage optimisés. Clients : Intermarché, Century 21, Frank Provost, Jott, Dominos. Formations niveaux 3-4-5. PROBLÈME CLÉ : contrôles DREETS/OPCO récurrents mal gérés. Ils ont contacté Nadir (pas l'inverse).
+
+PROFIL NADIR : 5 ans dirigeant FORMADIRECT (OF certifié Qualiopi). ~80 dossiers/an. Maîtrise CPF/OPCO, audits, conformité. DUT Gestion Administrative. Outils : Excel, Digiforma, GoHighLevel, Teams.
+
+STYLE OBLIGATOIRE :
+- Commence TOUJOURS par une accroche forte : jamais par "j'ai dirigé" ou "j'ai travaillé"
+- Exemples d'accroche : "Mon expertise c'est...", "Votre problème de contrôles...", "Ce que je sais faire mieux que quiconque...", "Là où je crée de la valeur..."
+- 2 phrases max. Ton assertif, niveau directeur. Pas de liste, pas de conditionnel mou.
+- 2ème phrase = conclusion percutante qui reste en tête
+- Salaire : "30 000€ est ma base, ajustable selon le périmètre"`;
+
+async function api(q){
+  document.getElementById('qtxt').textContent=q;
+  document.getElementById('atxt').style.display='none';
+  document.getElementById('spin').style.display='block';
+  try{
+    const r=await fetch(PROXY,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:100,system:SYS,messages:[{role:'user',content:q}]})
+    });
+    const d=await r.json();
+    show(d.content?.map(c=>c.text||'').join('')||'Erreur');
+  }catch(e){show('Erreur : '+e.message);}
+}
+
+function show(t){
+  document.getElementById('spin').style.display='none';
+  const el=document.getElementById('atxt');
+  el.style.display='block';el.style.color='#fff';
+  el.style.fontSize='22px';el.style.fontWeight='bold';
+  el.textContent=t;
+}
+
+function sendFree(){const v=document.getElementById('freeinp').value.trim();if(v){api(v);document.getElementById('freeinp').value='';}}
+
+const DETECT={
+  'présent':'Présentez-vous','pourquoi':'Pourquoi ce poste chez Level Hop',
+  'cfa':'Avez-vous déjà travaillé dans un CFA','qualiopi':'Votre connaissance de Qualiopi',
+  'contrôle':'Comment vérifiez-vous un dossier apprenti avant contrôle OPCO',
+  'manqu':'Que faites-vous si une pièce importante manque',
+  'risque':'Principaux risques de non-conformité dans un CFA',
+  'dreets':'Contrôle DREETS dans 2 semaines dossiers incohérents',
+  'opco':'Comment vérifiez-vous que la facturation OPCO est conforme',
+  'archiv':'Comment organisez-vous l archivage documentaire',
+  'équipe':'Comment faites-vous adhérer les équipes aux procédures',
+  'volume':'Comment gérez-vous un volume important de dossiers',
+  'outil':'Quels outils numériques pour la conformité',
+  'télétravail':'Comment garantissez-vous votre autonomie en télétravail',
+  'lourd':'Un responsable dit que vos procédures sont trop lourdes',
+  'mois':'Vos objectifs sur les 3 premiers mois',
+  'salaire':'Vos prétentions salariales','rémunér':'Vos prétentions salariales',
+  'question':'Avez-vous des questions pour nous','quitter':'Pourquoi quitter votre organisme',
+  'mesure':'Vos objectifs sur les 3 premiers mois','premier':'Vos objectifs sur les 3 premiers mois',
+};
+
+function detect(txt){
+  const t=txt.toLowerCase();
+  for(const[kw,q]of Object.entries(DETECT)){if(t.includes(kw)){api(q);return;}}
+  api(txt);
+}
+
+let rec=null,listening=false,silTimer=null,cur='',lastQ='';
+function toggleMic(){listening?stopMic():startMic();}
+function startMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Utilisez Chrome');return;}
+  rec=new SR();rec.lang='fr-FR';rec.continuous=true;rec.interimResults=true;
+  rec.onresult=e=>{
+    let fin='',int='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)fin+=e.results[i][0].transcript;
+      else int+=e.results[i][0].transcript;
+    }
+    cur=(cur+fin).trim();
+    const d=(cur+' '+int).trim();
+    if(d)document.getElementById('qtxt').textContent=d;
+    if(fin){clearTimeout(silTimer);silTimer=setTimeout(()=>{if(cur&&cur!==lastQ){lastQ=cur;detect(cur);cur='';}},2000);}
+  };
+  rec.onerror=()=>{};
+  rec.onend=()=>{if(listening)setTimeout(()=>rec.start(),300);};
+  rec.start();listening=true;
+  document.getElementById('dot').classList.add('on');
+  document.getElementById('stxt').textContent='🔴 Micro actif — écoute en cours';
+  document.getElementById('bmicro').textContent='⏹ Arrêter';
+  document.getElementById('bmicro').classList.add('on');
+}
+function stopMic(){
+  listening=false;if(rec)rec.stop();
+  document.getElementById('dot').classList.remove('on');
+  document.getElementById('stxt').textContent='Micro arrêté';
+  document.getElementById('bmicro').textContent='🎤 Activer micro';
+  document.getElementById('bmicro').classList.remove('on');
+}
+</script>
+</body>
+</html>
